@@ -91,3 +91,43 @@ set(CPACK_PACKAGING_INSTALL_PREFIX  "/usr")
 set(CPACK_PACKAGE_CONTACT           "Sergey Kostanbaev <sergey.kostanbaev@fairwaves.co>")
 
 include(CPack) #include last
+
+
+########################################################################
+## LitePCIe discovery
+########################################################################
+find_path(LITEPCIE_KERNEL_INCLUDE_DIR litepcie.h
+          REQUIRED
+          HINTS
+            ENV LITEPCIE_ROOT
+          PATH_SUFFIXES
+            kernel
+            driver/kernel
+            litepcie/software/kernel)
+find_path(LITEPCIE_USER_INCLUDE_DIR liblitepcie.h
+          REQUIRED
+          HINTS
+            ENV LITEPCIE_ROOT
+          PATH_SUFFIXES
+            user/liblitepcie
+            driver/user/liblitepcie
+            litepcie/software/user/liblitepcie)
+set(LITEPCIE_INCLUDE_DIR ${LITEPCIE_KERNEL_INCLUDE_DIR} ${LITEPCIE_USER_INCLUDE_DIR})
+find_library(LITEPCIE_LIBRARY litepcie
+             REQUIRED
+             HINTS
+               ENV LITEPCIE_ROOT
+             PATH_SUFFIXES
+               user/liblitepcie
+               driver/user/liblitepcie
+               litepcie/software/user/liblitepcie)
+
+########################################################################
+## Main executable
+########################################################################
+
+add_executable(main main.c)
+
+target_include_directories(main PRIVATE ${LITEPCIE_INCLUDE_DIR})
+
+target_link_libraries(main ${LITEPCIE_LIBRARY} lms7compact)
